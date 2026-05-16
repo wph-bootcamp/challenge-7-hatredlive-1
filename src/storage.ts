@@ -1,12 +1,33 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
+import { Todo } from './types';
 
-// TODO: Definisikan path file untuk menyimpan data To-Do
+const dataFolder = path.resolve(__dirname, '..', 'data');
+const todosFilePath = path.join(dataFolder, 'todos.json');
 
-// TODO: Buat fungsi untuk membaca To-Do dari file
-// Hint: Gunakan try-catch untuk handle error saat membaca file
+export function ensureStorage(): void {
+  if (!fs.existsSync(dataFolder)) {
+    fs.mkdirSync(dataFolder, { recursive: true });
+  }
 
-// TODO: Buat fungsi untuk menyimpan To-Do ke file
-// Hint: Jangan lupa konversi ke JSON string sebelum disimpan
+  if (!fs.existsSync(todosFilePath)) {
+    fs.writeFileSync(todosFilePath, '[]', 'utf-8');
+  }
+}
 
-// TODO: Buat fungsi untuk inisialisasi storage (buat file kosong jika belum ada)
+export function readTodosFromFile(): unknown {
+  ensureStorage();
+
+  try {
+    const rawData = fs.readFileSync(todosFilePath, 'utf-8');
+    return JSON.parse(rawData);
+  } catch (error) {
+    console.error('Gagal membaca data To-Do:', error);
+    return [];
+  }
+}
+
+export function writeTodosToFile(todos: Todo[]): void {
+  ensureStorage();
+  fs.writeFileSync(todosFilePath, JSON.stringify(todos, null, 2), 'utf-8');
+}
